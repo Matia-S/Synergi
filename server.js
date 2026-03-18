@@ -359,7 +359,7 @@ app.get('/health', (req, res) => {
   res.status(200).json({ ok: true });
 });
 
-const PUBLIC_DIR = path.join(__dirname, '../client');
+const PUBLIC_DIR = path.join(__dirname, '.');
 if (fs.existsSync(PUBLIC_DIR)) {
   app.use(express.static(PUBLIC_DIR, {
     setHeaders: (res, p) => {
