@@ -269,8 +269,48 @@ body{
     @keyframes splashGlow { from{ filter: drop-shadow(0 0 8px rgba(56,189,248,0.12)) } to{ filter: drop-shadow(0 0 30px rgba(56,189,248,0.28)) } }
     @keyframes splashFadeUp { from{ transform: translateY(12px) scale(.98); opacity:0 } to{ transform: translateY(0) scale(1); opacity:1 } }
 
-    /* small screens */
+/* small screens */
     @media (max-width:420px){ .logo-main{ width:240px } .splash img.logo1{ width:220px } .splash img.logo2{ width:120px } .bottom-bar { width: 100%; overflow-x: auto; justify-content: flex-start; padding: 0 20px; left: 0; transform: none; } }
+
+    /* Móvil en horizontal (landscape) — pre-registro */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .card {
+        padding: 12px 20px 20px 20px !important;
+        justify-content: flex-start !important;
+        overflow-y: auto !important;
+        height: 100vh !important;
+      }
+      .card > div[style*="margin-bottom:28px"] {
+        margin-bottom: 10px !important;
+      }
+      .card > div[style*="margin-bottom:24px"] {
+        margin-bottom: 8px !important;
+      }
+      .card img[alt="Synergi"] {
+        width: 130px !important;
+        margin-bottom: 8px !important;
+      }
+      .card h2 {
+        font-size: 15px !important;
+        margin-bottom: 4px !important;
+      }
+      .card p {
+        font-size: 11px !important;
+        margin-top: 3px !important;
+        margin-bottom: 3px !important;
+      }
+      #preregStep1Card > div[style*="margin-bottom:24px"] {
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+      }
+      #preregStep1Card > div[style*="margin-bottom:24px"] .logo-main {
+        display: none !important;
+      }
+      #copyrightText {
+        margin-top: 8px !important;
+        font-size: 10px !important;
+      }
+    }
 
     /* --- AÑADIDOS: panel izquierdo, top-right y main right (UI del perfil) --- */
     .app-wrap { display:flex; width: calc(104% - 0px); max-width:none; gap:30px; align-items:flex-start; justify-content: center; margin-top: 10px; }
@@ -1408,6 +1448,7 @@ body{
 <!-- MODAL ÉXITO PRE-REGISTRO (Nº3) -->
 <div class="modal-backdrop" id="modalPreregExito" role="dialog" aria-hidden="true">
   <div class="modal" style="max-width:440px; text-align:center; padding:40px 32px;">
+    <button onclick="el('modalPreregExito').style.display='none'; updateModalState();" class="btn-close-x">X</button>
     <div style="width:80px; height:80px; border-radius:50%;
                 background:linear-gradient(135deg,#22c55e,#16a34a);
                 display:flex; align-items:center; justify-content:center;
@@ -4630,6 +4671,7 @@ setTimeout(()=> {
       el('card').style.display = 'block';
       el('bottomBar').style.display = 'flex';
       updateLoginTopBtnVisibility();
+      cargarContadorPreregistros();
     }
   }, remaining);
 });
