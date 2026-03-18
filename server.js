@@ -1535,6 +1535,88 @@ app.post('/register-facebook', async (req, res) => {
   }
 });
 
+// ===== SISTEMA DE PRE-REGISTROS GLOBAL =====
+const preregistros = [];
+const PREREGISTROS_FILE = path.join(__dirname, 'preregistros.json');
+
+try {
+  if (fs.existsSync(PREREGISTROS_FILE)) {
+    const raw = fs.readFileSync(PREREGISTROS_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      parsed.forEach(p => preregistros.push(p));
+      console.log('✅ Pre-registros cargados:', preregistros.length);
+    }
+  }
+} catch(e) {
+  console.warn('⚠️ No se pudo leer preregistros.json', e);
+}
+
+function savePreregistrosToFile() {
+  try {
+    fs.writeFileSync(PREREGISTROS_FILE, JSON.stringify(preregistros, null, 2), 'utf8');
+  } catch(e) {
+    console.error('❌ Error guardando preregistros.json:', e);
+  }
+}
+
+app.get('/get-preregistros-count', (req, res) => {
+  res.json({ count: preregistros.length });
+});
+
+app.post('/check-preregistro', (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ available: false, message: 'Nombre requerido.' });
+    }
+    const lower = username.trim().toLowerCase();
+    if (lower.length > 30) {
+      return res.status(400).json({ available: false, message: 'Máximo 30 caracteres.' });
+    }
+    if (lower.includes('@')) {
+      return res.status(400).json({ available: false, message: 'No uses el símbolo @.' });
+    }
+    const inPreregistros = preregistros.some(p => (p.username || '').toLowerCase() === lower);
+    if (inPreregistros) {
+      return res.json({ available: false, message: 'Este nombre ya fue reservado.' });
+    }
+    const inUsers = users.some(u => (u.username || '').toLowerCase() === lower);
+    if (inUsers) {
+      return res.json({ available: false, message: 'Este nombre ya está registrado en Synergi.' });
+    }
+    return res.json({ available: true });
+  } catch(err) {
+    res.status(500).json({ available: false, message: 'Error interno.' });
+  }
+});
+
+app.post('/save-preregistro', (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username || !username.trim()) {
+      return res.status(400).json({ success: false, message: 'Nombre requerido.' });
+    }
+    const lower = username.trim().toLowerCase();
+    if (lower.length > 30) {
+      return res.status(400).json({ success: false, message: 'Máximo 30 caracteres.' });
+    }
+    const inPreregistros = preregistros.some(p => (p.username || '').toLowerCase() === lower);
+    const inUsers = users.some(u => (u.username || '').toLowerCase() === lower);
+    if (inPreregistros || inUsers) {
+      return res.json({ success: false, message: 'Este nombre ya fue reservado o registrado.' });
+    }
+    preregistros.push({ username: username.trim(), reservedAt: new Date().toISOString() });
+    savePreregistrosToFile();
+    console.log(`📝 Pre-registro: @${username.trim()} | Total: ${preregistros.length}`);
+    return res.json({ success: true, total: preregistros.length });
+  } catch(err) {
+    console.error('Error en /save-preregistro:', err);
+    res.status(500).json({ success: false, message: 'Error interno.' });
+  }
+});
+// ===== FIN SISTEMA DE PRE-REGISTROS GLOBAL =====
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log('');
