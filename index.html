@@ -1393,7 +1393,7 @@ body{
              maxlength="30"
              placeholder="tunombre"
              autocomplete="off"
-             oninput="onPreregInput(this.value)"
+             oninput="if(this.value.length > 30) this.value = this.value.slice(0, 30); onPreregInput(this.value);"
              style="width:100%; padding:14px 44px 14px 34px; border-radius:12px;
                     border:2px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.25);
                     color:white; outline:none; font-size:16px; font-weight:600;
@@ -1461,7 +1461,7 @@ body{
     <h3 style="color:#22c55e; font-size:24px; font-weight:800; margin:0 0 12px 0;">
       ¡Nombre reservado!
     </h3>
-    <p style="color:#cbd5e1; font-size:16px; margin:0 0 8px 0;">
+    <p style="color:#cbd5e1; font-size:16px; margin:0 0 8px 0; word-break: break-all;"></p>
       <strong id="preregSuccessNameModal" style="color:#38bdf8; font-size:24px;"></strong>
     </p>
     <p style="color:#9aa4b2; font-size:13px; line-height:1.7; margin:0 0 32px 0;">
@@ -10940,3 +10940,4 @@ async function resetPreregCard() {
 <!-- Tooltip global de actividad -->
 <div id="activityTooltip"></div>
 </body>
+
