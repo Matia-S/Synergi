@@ -1566,7 +1566,8 @@ app.post('/check-preregistro', async (req, res) => {
     const lower = username.trim().toLowerCase();
     if (lower.length > 30) return res.status(400).json({ available: false, message: 'Máximo 30 caracteres.' });
     if (lower.includes('@')) return res.status(400).json({ available: false, message: 'No uses el símbolo @.' });
-    const inPreregistros = await Preregistro.findOne({ username: { $regex: new RegExp(`^${lower}$`, 'i') } });
+const escapedLower = lower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const inPreregistros = await Preregistro.findOne({ username: { $regex: new RegExp(`^${escapedLower}$`, 'i') } });
     if (inPreregistros) return res.json({ available: false, message: 'Este nombre ya fue reservado.' });
     const inUsers = users.some(u => (u.username || '').toLowerCase() === lower);
     if (inUsers) return res.json({ available: false, message: 'Este nombre ya está registrado en Synergi.' });
@@ -1582,7 +1583,8 @@ app.post('/save-preregistro', async (req, res) => {
     if (!username || !username.trim()) return res.status(400).json({ success: false, message: 'Nombre requerido.' });
     const lower = username.trim().toLowerCase();
     if (lower.length > 30) return res.status(400).json({ success: false, message: 'Máximo 30 caracteres.' });
-    const inPreregistros = await Preregistro.findOne({ username: { $regex: new RegExp(`^${lower}$`, 'i') } });
+const escapedLower = lower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const inPreregistros = await Preregistro.findOne({ username: { $regex: new RegExp(`^${escapedLower}$`, 'i') } });
     const inUsers = users.some(u => (u.username || '').toLowerCase() === lower);
     if (inPreregistros || inUsers) return res.json({ success: false, message: 'Este nombre ya fue reservado o registrado.' });
     await Preregistro.create({ username: username.trim() });
@@ -1607,55 +1609,3 @@ app.listen(PORT, () => {
   console.log('🚀 ===============================================');
   console.log('');
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
