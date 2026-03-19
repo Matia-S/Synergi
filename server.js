@@ -1535,93 +1535,72 @@ app.post('/register-facebook', async (req, res) => {
   }
 });
 
-// ===== SISTEMA DE PRE-REGISTROS GLOBAL =====
-const preregistros = [];
-const PREREGISTROS_FILE = path.join(__dirname, 'preregistros.json');
+// ===== SISTEMA DE PRE-REGISTROS CON MONGODB =====
+const mongoose = require('mongoose');
 
-try {
-  if (fs.existsSync(PREREGISTROS_FILE)) {
-    const raw = fs.readFileSync(PREREGISTROS_FILE, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) {
-      parsed.forEach(p => preregistros.push(p));
-      console.log('✅ Pre-registros cargados:', preregistros.length);
-    }
-  }
-} catch(e) {
-  console.warn('⚠️ No se pudo leer preregistros.json', e);
-}
+const MONGODB_URI = 'mongodb+srv://sarmientomiranda89_db_user:oFUcibiikMFeUvZZ@cluster0.r7rncel.mongodb.net/synergi?retryWrites=true&w=majority&appName=Cluster0';
 
-function savePreregistrosToFile() {
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ MongoDB Atlas conectado'))
+  .catch(err => console.error('❌ Error MongoDB:', err));
+
+const preregSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  reservedAt: { type: Date, default: Date.now }
+});
+const Preregistro = mongoose.model('Preregistro', preregSchema);
+
+app.get('/get-preregistros-count', async (req, res) => {
   try {
-    fs.writeFileSync(PREREGISTROS_FILE, JSON.stringify(preregistros, null, 2), 'utf8');
+    const count = await Preregistro.countDocuments();
+    res.json({ count });
   } catch(e) {
-    console.error('❌ Error guardando preregistros.json:', e);
+    res.json({ count: 0 });
   }
-}
-
-app.get('/get-preregistros-count', (req, res) => {
-  res.json({ count: preregistros.length });
 });
 
-app.post('/check-preregistro', (req, res) => {
+app.post('/check-preregistro', async (req, res) => {
   try {
     const { username } = req.body;
-    if (!username || !username.trim()) {
-      return res.status(400).json({ available: false, message: 'Nombre requerido.' });
-    }
+    if (!username || !username.trim()) return res.status(400).json({ available: false, message: 'Nombre requerido.' });
     const lower = username.trim().toLowerCase();
-    if (lower.length > 30) {
-      return res.status(400).json({ available: false, message: 'Máximo 30 caracteres.' });
-    }
-    if (lower.includes('@')) {
-      return res.status(400).json({ available: false, message: 'No uses el símbolo @.' });
-    }
-    const inPreregistros = preregistros.some(p => (p.username || '').toLowerCase() === lower);
-    if (inPreregistros) {
-      return res.json({ available: false, message: 'Este nombre ya fue reservado.' });
-    }
+    if (lower.length > 30) return res.status(400).json({ available: false, message: 'Máximo 30 caracteres.' });
+    if (lower.includes('@')) return res.status(400).json({ available: false, message: 'No uses el símbolo @.' });
+    const inPreregistros = await Preregistro.findOne({ username: { $regex: new RegExp(`^${lower}$`, 'i') } });
+    if (inPreregistros) return res.json({ available: false, message: 'Este nombre ya fue reservado.' });
     const inUsers = users.some(u => (u.username || '').toLowerCase() === lower);
-    if (inUsers) {
-      return res.json({ available: false, message: 'Este nombre ya está registrado en Synergi.' });
-    }
+    if (inUsers) return res.json({ available: false, message: 'Este nombre ya está registrado en Synergi.' });
     return res.json({ available: true });
   } catch(err) {
     res.status(500).json({ available: false, message: 'Error interno.' });
   }
 });
 
-app.post('/save-preregistro', (req, res) => {
+app.post('/save-preregistro', async (req, res) => {
   try {
     const { username } = req.body;
-    if (!username || !username.trim()) {
-      return res.status(400).json({ success: false, message: 'Nombre requerido.' });
-    }
+    if (!username || !username.trim()) return res.status(400).json({ success: false, message: 'Nombre requerido.' });
     const lower = username.trim().toLowerCase();
-    if (lower.length > 30) {
-      return res.status(400).json({ success: false, message: 'Máximo 30 caracteres.' });
-    }
-    const inPreregistros = preregistros.some(p => (p.username || '').toLowerCase() === lower);
+    if (lower.length > 30) return res.status(400).json({ success: false, message: 'Máximo 30 caracteres.' });
+    const inPreregistros = await Preregistro.findOne({ username: { $regex: new RegExp(`^${lower}$`, 'i') } });
     const inUsers = users.some(u => (u.username || '').toLowerCase() === lower);
-    if (inPreregistros || inUsers) {
-      return res.json({ success: false, message: 'Este nombre ya fue reservado o registrado.' });
-    }
-    preregistros.push({ username: username.trim(), reservedAt: new Date().toISOString() });
-    savePreregistrosToFile();
-    console.log(`📝 Pre-registro: @${username.trim()} | Total: ${preregistros.length}`);
-    return res.json({ success: true, total: preregistros.length });
+    if (inPreregistros || inUsers) return res.json({ success: false, message: 'Este nombre ya fue reservado o registrado.' });
+    await Preregistro.create({ username: username.trim() });
+    const total = await Preregistro.countDocuments();
+    console.log(`📝 Pre-registro: @${username.trim()} | Total: ${total}`);
+    return res.json({ success: true, total });
   } catch(err) {
     console.error('Error en /save-preregistro:', err);
     res.status(500).json({ success: false, message: 'Error interno.' });
   }
 });
-// ===== FIN SISTEMA DE PRE-REGISTROS GLOBAL =====
+// ===== FIN SISTEMA DE PRE-REGISTROS CON MONGODB =====
 
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log('');
   console.log('🚀 ===============================================');
-  console.log('🚀  SERVIDOR SYNERGI CON PAGOS REALES STRIPE');
+  console.log('🚀  SERVIDOR SYNERGI CON MONGODB ATLAS');
   console.log('🚀 ===============================================');
   console.log(`🚀  URL: http://localhost:${PORT}`);
   console.log('🚀  Estado: ✅ ACTIVO');
