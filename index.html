@@ -327,49 +327,65 @@ body{
 /* Nº1: Modal éxito pre-registro — cuadrado en todos los móviles */
     @media (max-width: 900px) {
       #modalPreregExito .modal {
-        width: 72vmin !important;
-        max-width: 72vmin !important;
-        min-height: 72vmin !important;
-        padding: 5vmin 5vmin !important;
-        gap: 2vmin !important;
-        overflow-y: auto !important;
+        width: min(78vw, 78vh) !important;
+        height: min(78vw, 78vh) !important;
+        max-width: min(78vw, 78vh) !important;
+        max-height: min(78vw, 78vh) !important;
+        min-width: unset !important;
+        min-height: unset !important;
+        padding: 18px !important;
+        overflow: hidden !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        justify-content: center !important;
+        justify-content: space-evenly !important;
         box-sizing: border-box !important;
+        gap: 0 !important;
+      }
+      #modalPreregExito .modal .btn-close-x {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+        top: 8px !important;
+        right: 8px !important;
       }
       #modalPreregExito .modal > div:first-of-type {
-        width: 10vmin !important;
-        height: 10vmin !important;
-        min-width: 10vmin !important;
-        min-height: 10vmin !important;
-        margin: 0 auto 2vmin !important;
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        min-height: 48px !important;
+        margin: 0 !important;
         box-shadow: none !important;
+        flex-shrink: 0 !important;
       }
       #modalPreregExito .modal > div:first-of-type svg {
-        width: 5vmin !important;
-        height: 5vmin !important;
+        width: 24px !important;
+        height: 24px !important;
       }
       #modalPreregExito .modal h3 {
-        font-size: 4vmin !important;
-        margin: 0 0 1vmin 0 !important;
+        font-size: 16px !important;
+        margin: 0 !important;
         text-align: center !important;
+        flex-shrink: 0 !important;
       }
       #modalPreregExito .modal p {
-        font-size: 2.8vmin !important;
-        margin: 0 0 1vmin 0 !important;
-        line-height: 1.4 !important;
+        font-size: 11px !important;
+        margin: 0 !important;
+        line-height: 1.3 !important;
         text-align: center !important;
+        flex-shrink: 0 !important;
       }
       #modalPreregExito .modal strong#preregSuccessNameModal {
-        font-size: 4.5vmin !important;
+        font-size: 18px !important;
+        display: block !important;
+        text-align: center !important;
       }
       #modalPreregExito .modal button.primary {
-        padding: 2vmin 3vmin !important;
-        font-size: 3vmin !important;
-        margin-top: 2vmin !important;
+        padding: 10px !important;
+        font-size: 12px !important;
+        margin: 0 !important;
         width: 100% !important;
+        flex-shrink: 0 !important;
       }
     }
     
