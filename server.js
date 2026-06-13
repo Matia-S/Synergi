@@ -10,6 +10,11 @@ const path = require('path');
 // ====== NUEVO: Importar Stripe REAL ======
 const stripe = require('stripe')('sk_test_51SzMjvGhbQMsA6UZtRXvR5nseUDVFa95MVWoRd6ilWgWWozIa5rPMIsoRwe08cUwPVtv8t11FOsBHG9xllhL3ydT00BUgSEOdE'); // ⚠️ REEMPLAZAR CON TU CLAVE SECRETA
 
+// ✅NEW: URL pública real del servidor. NUNCA pongas "localhost" aquí —
+// localhost solo funciona en TU propia computadora, no para tus usuarios.
+// Si en el futuro cambias de hosting, solo actualizas esta línea.
+const BASE_URL = 'https://synergi-q4a2.onrender.com';
+
 const nodemailer = require('nodemailer');
 
 // ⚠️ IMPORTANTE: Para que funcione debés crear una "Contraseña de aplicación" de Google:
@@ -357,6 +362,14 @@ app.post('/send-report', async (req, res) => {
 
 app.get('/health', (req, res) => {
   res.status(200).json({ ok: true });
+});
+
+// ✅NEW: Service Worker servido SIN caché, para que las actualizaciones
+// de la PWA se apliquen al instante (debe ir ANTES del express.static)
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.sendFile(path.join(__dirname, 'sw.js'));
 });
 
 const PUBLIC_DIR = path.join(__dirname, '.');
@@ -907,8 +920,8 @@ app.post('/create-premium-session', async (req, res) => {
         },
       ],
       mode: 'subscription',
-      success_url: `http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}&userId=${userId}`,
-      cancel_url: 'http://localhost:3000/payment-cancel',
+      success_url: `${BASE_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}&userId=${userId}`,
+      cancel_url: `${BASE_URL}/payment-cancel`,
       client_reference_id: userId,
       customer_email: user.email || `${username}@synergi.com`,
       metadata: {
