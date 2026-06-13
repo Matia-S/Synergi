@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Synergi</title>
   <link rel="icon" type="image/png" href="7831e36b-fd36-4a34-aa7d-9a0c1193a071_removalai_preview.png" />
+
+  <!-- ✅NEW: PWA - Hace que Synergi sea "instalable" como app real en Windows, Android y iOS -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0ea5e9">
+  <link rel="apple-touch-icon" href="6162758d7a84d0b950fca866c2ff064.png">
+
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
@@ -268,6 +274,67 @@ body{
     @keyframes splashScale { from{ transform: scale(.6); opacity:0 } to{ transform: scale(1); opacity:1 } }
     @keyframes splashGlow { from{ filter: drop-shadow(0 0 8px rgba(56,189,248,0.12)) } to{ filter: drop-shadow(0 0 30px rgba(56,189,248,0.28)) } }
     @keyframes splashFadeUp { from{ transform: translateY(12px) scale(.98); opacity:0 } to{ transform: translateY(0) scale(1); opacity:1 } }
+
+    /* ✅NEW Nº1: Pantalla de carga especial cuando Synergi se abre como App instalada */
+    .app-launch-splash {
+      background: url('FondoImag3.png') center center / cover no-repeat !important;
+    }
+    .app-launch-splash::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(2, 8, 18, 0.5);
+      z-index: 0;
+    }
+    .app-launch-progress-wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      width: 100%;
+      padding: 0 40px;
+      box-sizing: border-box;
+    }
+    .app-launch-logo {
+      width: 460px;
+      max-width: 88vw;
+      filter: drop-shadow(0 10px 40px rgba(56,189,248,0.4));
+    }
+    .app-launch-progress-bar {
+      width: 100%;
+      max-width: 380px;
+      height: 8px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(56,189,248,0.2);
+    }
+    .app-launch-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+      border-radius: 999px;
+    }
+
+    /* ✅NEW Nº1: Botón flotante de descarga, idéntico visualmente a .small-btn.square */
+    .floating-app-btn {
+      background: rgba(10,16,26,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .floating-app-btn:hover { background: rgba(15, 23, 42, 0.9); }
+    .floating-app-btn img, .floating-app-btn svg { width: 100%; height: 100%; object-fit: contain; }
 
 /* small screens */
     @media (max-width:420px){ .logo-main{ width:240px } .splash img.logo1{ width:220px } .splash img.logo2{ width:120px } .bottom-bar { width: 100%; overflow-x: auto; justify-content: flex-start; padding: 0 20px; left: 0; transform: none; } }
@@ -1522,6 +1589,14 @@ body{
 
 </div>
 
+  <!-- ✅NEW Nº1: Botón flotante de descarga, idéntico al de la app (downloadAction) -->
+  <div id="preregDownloadBtnWrap" style="position:fixed; bottom:20px; right:20px; z-index:210; display:flex; gap:10px;">
+    <div class="floating-app-btn" id="downloadActionPrereg" title="Descargar"
+         onclick="el('modalDownload').style.display='flex'; updateModalState();">
+      <img src="DescargarIcon3.png" alt="Descargar" onerror="this.style.display='none'">
+    </div>
+  </div>
+
 <!-- MODAL ÉXITO PRE-REGISTRO (Nº3) -->
 <div class="modal-backdrop" id="modalPreregExito" role="dialog" aria-hidden="true">
   <div class="modal" style="max-width:440px; text-align:center; padding:40px 32px;">
@@ -1738,9 +1813,15 @@ Explorá cómo funciona por dentro, sus características principales, mejoras, h
         <img src="3036741f-b8f3-47a5-89e5-16b62c36d03c_removalai_preview.png" alt="Download Preview" style="width:180px; margin-bottom:10px;">
         <h3 style="color:white; margin:0;">¡Descarga synergi para computadoras!</h3>
       </div>
-        <button class="primary" style="margin-top:20px;" id="modalDownloadBtn" onclick="window.location.href='http://localhost:3000/download/windows'">
+        <button class="primary" style="margin-top:20px;" id="modalDownloadBtn" onclick="iniciarDescargaWindows()">
         <svg class="svg-icon" viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0V3.449zm10.949-1.69L24 0v11.4H10.949V1.76zM0 12.6h9.75v9.451L0 20.699V12.6zm10.949 0H24V24l-13.051-1.84V12.6z"/></svg>
         DESCARGAR PARA WINDOWS
+      </button>
+
+      <!-- ✅NEW Nº2: Botón Descargar para dispositivos móviles -->
+      <button class="primary" style="margin-top:12px; background:linear-gradient(135deg,#34d399,#10b981);" id="modalDownloadMobileBtn" onclick="iniciarDescargaMovil()">
+        <svg class="svg-icon" viewBox="0 0 24 24" fill="white"><path d="M16 1H8C6.34 1 5 2.34 5 4v16c0 1.66 1.34 3 3 3h8c1.66 0 3-1.34 3-3V4c0-1.66-1.34-3-3-3zm1 17H7V4h10v14zm-4 3h-2v-1h2v1z"/></svg>
+        DESCARGAR PARA DISPOSITIVOS MÓVILES
       </button>
     </div>
   </div>
@@ -3289,6 +3370,92 @@ function mostrarSplashFondo() {
 function ocultarSplashFondo() {
   document.body.classList.remove('splash-visible');
 }
+
+/* ==== ✅NEW Nº1: Pantalla de carga especial al abrir Synergi como App instalada ==== */
+const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches
+                      || window.navigator.standalone === true; // soporte iOS
+
+if (isStandaloneApp) {
+  const _splashEl = document.getElementById('splash');
+  if (_splashEl) {
+    _splashEl.classList.add('app-launch-splash');
+    _splashEl.innerHTML = `
+      <div class="app-launch-progress-wrap">
+        <img src="3036741f-b8f3-47a5-89e5-16b62c36d03c_removalai_preview.png" alt="Synergi" class="app-launch-logo">
+        <div class="app-launch-progress-bar">
+          <div class="app-launch-progress-fill" id="appLaunchProgressFill"></div>
+        </div>
+      </div>
+    `;
+    requestAnimationFrame(() => {
+      const fill = document.getElementById('appLaunchProgressFill');
+      if (fill) {
+        fill.style.transition = 'width 3000ms linear';
+        requestAnimationFrame(() => { fill.style.width = '100%'; });
+      }
+    });
+  }
+}
+
+/* ==== ✅NEW: Sistema de instalación como App (PWA) - Windows y Móvil ==== */
+let _deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('No se pudo registrar el Service Worker:', err);
+    });
+  });
+}
+
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isAndroid() {
+  return /android/i.test(navigator.userAgent);
+}
+
+async function iniciarDescargaWindows() {
+  if (_deferredInstallPrompt) {
+    _deferredInstallPrompt.prompt();
+    const { outcome } = await _deferredInstallPrompt.userChoice;
+    _deferredInstallPrompt = null;
+    if (outcome === 'accepted') {
+      el('modalDownload').style.display = 'none';
+      updateModalState();
+    }
+    return;
+  }
+  alert('Para instalar Synergi como aplicación de escritorio:\n\n1. Abrí el menú de tu navegador (⋮ o ...)\n2. Buscá la opción "Instalar Synergi" o "Instalar aplicación"\n\nSi no aparece, es posible que ya esté instalada o que tu navegador no sea compatible (recomendamos Chrome o Edge).');
+}
+
+async function iniciarDescargaMovil() {
+  if (_deferredInstallPrompt) {
+    _deferredInstallPrompt.prompt();
+    const { outcome } = await _deferredInstallPrompt.userChoice;
+    _deferredInstallPrompt = null;
+    if (outcome === 'accepted') {
+      el('modalDownload').style.display = 'none';
+      updateModalState();
+    }
+    return;
+  }
+  if (isIOS()) {
+    alert('Para instalar Synergi en tu iPhone/iPad:\n\n1. Tocá el botón "Compartir" (el cuadrado con flecha hacia arriba) en Safari\n2. Seleccioná "Agregar a pantalla de inicio"\n3. Tocá "Agregar"\n\n¡Listo! Synergi va a aparecer como una app más en tu pantalla, con su propio ícono.');
+  } else if (isAndroid()) {
+    alert('Para instalar Synergi en tu Android:\n\n1. Abrí el menú de Chrome (⋮)\n2. Tocá "Instalar aplicación" o "Agregar a pantalla de inicio"\n\n¡Listo! Synergi va a aparecer como una app más en tu dispositivo.');
+  } else {
+    alert('Abrí esta página desde el navegador de tu celular (Chrome o Safari) para poder instalarla como aplicación.');
+  }
+}
+
+window.iniciarDescargaWindows = iniciarDescargaWindows;
+window.iniciarDescargaMovil = iniciarDescargaMovil;
 
 /* ==== NUEVO: Sistema de memoria de última vista ==== */
 const VIEW_STORAGE_KEY = 'synergi_lastView';
@@ -5052,6 +5219,7 @@ function hideRegistrationUICompletely() {
     el('card').style.display = 'none';
     el('bottomBar').style.display = 'none';
     el('mainLogo').style.display = 'none';
+    el('preregDownloadBtnWrap').style.display = 'none'; // ✅NEW: ocultar botón flotante dentro de la app
     // Al entrar a la app se quita el fondo de registro
     desactivarFondoRegistro();
   } catch(e){}
@@ -5626,6 +5794,7 @@ avatarCerrarSesion.addEventListener('click', ()=>{
 el('card').style.display = 'block';
   el('bottomBar').style.display = 'flex';
   el('mainLogo').style.display = 'block';
+  el('preregDownloadBtnWrap').style.display = 'flex'; // ✅NEW: volver a mostrar botón flotante
 
   el('appRoot').style.display = 'none';
   leftPanel.style.display = 'none';
@@ -9652,6 +9821,7 @@ async function confirmarEliminarCuenta() {
   el('card').style.display = 'block';
   el('bottomBar').style.display = 'flex';
   el('mainLogo').style.display = 'block';
+  el('preregDownloadBtnWrap').style.display = 'flex'; // ✅NEW: volver a mostrar botón flotante
   activarFondoRegistro();
   updateModalState();
   setTimeout(updateLoginTopBtnVisibility, 100);
@@ -11017,4 +11187,3 @@ async function resetPreregCard() {
 <!-- Tooltip global de actividad -->
 <div id="activityTooltip"></div>
 </body>
-
