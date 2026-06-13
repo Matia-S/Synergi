@@ -1,0 +1,24 @@
+{
+  "name": "Synergi",
+  "short_name": "Synergi",
+  "description": "Synergi - Red social de mundo abierto",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070f1a",
+  "theme_color": "#0ea5e9",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "6162758d7a84d0b950fca866c2ff064.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "6162758d7a84d0b950fca866c2ff064.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
