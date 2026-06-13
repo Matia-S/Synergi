@@ -417,6 +417,18 @@ body{
     .small-btn.square { width:44px; height:44px; padding:6px; border-radius:8px; display:flex; align-items:center; justify-content:center; }
     .small-btn img { width:100%; height:100%; object-fit:contain; display:block; }
 
+    /* ✅NEW Nº1 (corregido): estilo de .small-btn reutilizable fuera de .top-actions,
+       para que el botón Descargar del menú de Pre-registro sea idéntico al de la app */
+    .small-btn {
+      background: rgba(10,16,26,0.6);
+      border-radius: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
     .avatar-circle { width:36px; height:36px; border-radius:50%; overflow:hidden; display:inline-block; border:2px solid rgba(255,255,255,0.03); }
     .avatar-circle img { width:100%; height:100%; object-fit:cover; display:block; }
 
@@ -1526,15 +1538,17 @@ body{
   <p id="copyrightText" style="margin:18px 0 0 0; color:#4a5568; font-size:11px;
      font-weight:500; letter-spacing:0.4px; user-select:none; text-align:center;"></p>
 
-</div>
-
-  <!-- ✅NEW Nº1: Botón flotante de descarga, idéntico al de la app (downloadAction) -->
-  <div id="preregDownloadBtnWrap" style="position:fixed; bottom:20px; right:20px; z-index:210; display:flex; gap:10px;">
-    <div class="floating-app-btn" id="downloadActionPrereg" title="Descargar"
+  <!-- ✅NEW Nº1 (corregido): Botón de descarga AHORA DENTRO del menú de Pre-registro,
+       debajo del copyright y alineado a la derecha (sin salirse del menú).
+       Mismas clases (small-btn square) que #downloadAction de la app. -->
+  <div id="preregDownloadBtnWrap" style="display:flex; justify-content:flex-end; margin-top:14px;">
+    <div class="small-btn square" id="downloadActionPrereg" title="Descargar"
          onclick="el('modalDownload').style.display='flex'; updateModalState();">
       <img src="DescargarIcon3.png" alt="Descargar" onerror="this.style.display='none'">
     </div>
   </div>
+
+</div>
 
 <!-- MODAL ÉXITO PRE-REGISTRO (Nº3) -->
 <div class="modal-backdrop" id="modalPreregExito" role="dialog" aria-hidden="true">
@@ -3308,32 +3322,6 @@ function mostrarSplashFondo() {
 }
 function ocultarSplashFondo() {
   document.body.classList.remove('splash-visible');
-}
-
-/* ==== ✅NEW Nº1: Pantalla de carga especial al abrir Synergi como App instalada ==== */
-const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches
-                      || window.navigator.standalone === true; // soporte iOS
-
-if (isStandaloneApp) {
-  const _splashEl = document.getElementById('splash');
-  if (_splashEl) {
-    _splashEl.classList.add('app-launch-splash');
-    _splashEl.innerHTML = `
-      <div class="app-launch-progress-wrap">
-        <img src="3036741f-b8f3-47a5-89e5-16b62c36d03c_removalai_preview.png" alt="Synergi" class="app-launch-logo">
-        <div class="app-launch-progress-bar">
-          <div class="app-launch-progress-fill" id="appLaunchProgressFill"></div>
-        </div>
-      </div>
-    `;
-    requestAnimationFrame(() => {
-      const fill = document.getElementById('appLaunchProgressFill');
-      if (fill) {
-        fill.style.transition = 'width 3000ms linear';
-        requestAnimationFrame(() => { fill.style.width = '100%'; });
-      }
-    });
-  }
 }
 
 /* ==== ✅NEW: Sistema de instalación como App (PWA) - Windows y Móvil ==== */
