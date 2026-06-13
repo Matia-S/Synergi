@@ -275,68 +275,7 @@ body{
     @keyframes splashGlow { from{ filter: drop-shadow(0 0 8px rgba(56,189,248,0.12)) } to{ filter: drop-shadow(0 0 30px rgba(56,189,248,0.28)) } }
     @keyframes splashFadeUp { from{ transform: translateY(12px) scale(.98); opacity:0 } to{ transform: translateY(0) scale(1); opacity:1 } }
 
-    /* ✅NEW Nº1: Pantalla de carga especial cuando Synergi se abre como App instalada */
-    .app-launch-splash {
-      background: url('FondoImag3.png') center center / cover no-repeat !important;
-    }
-    .app-launch-splash::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(2, 8, 18, 0.5);
-      z-index: 0;
-    }
-    .app-launch-progress-wrap {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 30px;
-      width: 100%;
-      padding: 0 40px;
-      box-sizing: border-box;
-    }
-    .app-launch-logo {
-      width: 460px;
-      max-width: 88vw;
-      filter: drop-shadow(0 10px 40px rgba(56,189,248,0.4));
-    }
-    .app-launch-progress-bar {
-      width: 100%;
-      max-width: 380px;
-      height: 8px;
-      background: rgba(255,255,255,0.12);
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid rgba(56,189,248,0.2);
-    }
-    .app-launch-progress-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-      border-radius: 999px;
-    }
-
-    /* ✅NEW Nº1: Botón flotante de descarga, idéntico visualmente a .small-btn.square */
-    .floating-app-btn {
-      background: rgba(10,16,26,0.6);
-      border: 1px solid rgba(255,255,255,0.03);
-      border-radius: 8px;
-      width: 44px;
-      height: 44px;
-      padding: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(4px);
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .floating-app-btn:hover { background: rgba(15, 23, 42, 0.9); }
-    .floating-app-btn img, .floating-app-btn svg { width: 100%; height: 100%; object-fit: contain; }
-
-/* small screens */
+    /* small screens */
     @media (max-width:420px){ .logo-main{ width:240px } .splash img.logo1{ width:220px } .splash img.logo2{ width:120px } .bottom-bar { width: 100%; overflow-x: auto; justify-content: flex-start; padding: 0 20px; left: 0; transform: none; } }
 
 /* Móvil en horizontal (landscape) — pre-registro */
