@@ -198,6 +198,16 @@ body{
     .scrolling-frame::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
     /* ✅NEW Nº1: Frames de donación dentro de #modalDonar - mismo lenguaje visual que el resto del sitio */
+    #modalDonar .modal {
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #modalDonar .scrolling-frame {
+      overflow-y: auto;
+      flex: 1;
+    }
+
     .donar-frame {
       display: flex; align-items: center; gap: 14px;
       background: rgba(15,23,42,0.7); border: 1px solid rgba(255,255,255,0.05);
@@ -225,10 +235,16 @@ body{
     }
     .donar-frame-price-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56,189,248,0.4); }
 
-    /* Adaptación móvil del modal Donar: el botón de precio se apila debajo en pantallas angostas */
+    /* Adaptación móvil del modal Donar: el botón de precio se apila debajo en pantallas angostas y se ajusta el modal */
     @media (max-width: 480px) {
-      .donar-frame { flex-wrap: wrap; }
-      .donar-frame-price-btn { width: 100%; margin-top: 10px; }
+      #modalDonar .modal {
+        padding: 20px 15px !important; /* Reduce el padding para que no se vea gigante */
+        width: 95vw !important;
+      }
+      .donar-frame { flex-wrap: wrap; padding: 12px; gap: 10px; }
+      .donar-frame-price-btn { width: 100%; margin-top: 8px; padding: 12px; font-size: 14px; text-align: center; }
+      .donar-frame-icon { width: 40px; height: 40px; padding: 6px; }
+      .donar-frame-title { font-size: 14px; }
     }
 
     /* LAYOUT BLOG */
