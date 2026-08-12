@@ -197,6 +197,40 @@ body{
     .scrolling-frame::-webkit-scrollbar { width: 6px; }
     .scrolling-frame::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
 
+    /* ✅NEW Nº1: Frames de donación dentro de #modalDonar - mismo lenguaje visual que el resto del sitio */
+    .donar-frame {
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(15,23,42,0.7); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .donar-frame:last-child { margin-bottom: 0; }
+    .donar-frame:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      border-color: var(--accent);
+    }
+    .donar-frame-icon {
+      width: 46px; height: 46px; flex-shrink: 0; border-radius: 10px;
+      background: rgba(56,189,248,0.08); display: flex; align-items: center; justify-content: center; padding: 9px;
+    }
+    .donar-frame-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .donar-frame-info { flex: 1; min-width: 0; }
+    .donar-frame-title { color: white; font-weight: 700; font-size: 15px; margin: 0 0 4px 0; }
+    .donar-frame-sub { color: #9aa4b2; font-size: 12px; margin: 0; }
+    .donar-frame-price-btn {
+      flex-shrink: 0; border: none; border-radius: 8px; padding: 10px 16px;
+      background: linear-gradient(135deg, var(--accent), #0ea5e9); color: #04101a;
+      font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap; transition: 0.3s;
+    }
+    .donar-frame-price-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56,189,248,0.4); }
+
+    /* Adaptación móvil del modal Donar: el botón de precio se apila debajo en pantallas angostas */
+    @media (max-width: 480px) {
+      .donar-frame { flex-wrap: wrap; }
+      .donar-frame-price-btn { width: 100%; margin-top: 10px; }
+    }
+
     /* LAYOUT BLOG */
     .blog-layout { display: flex; flex-direction: row; gap: 20px; align-items: flex-start; }
     .blog-img { width: 40%; border-radius: 8px; object-fit: cover; }
@@ -1541,7 +1575,12 @@ body{
   <!-- ✅NEW Nº1 (corregido): Botón de descarga AHORA DENTRO del menú de Pre-registro,
        debajo del copyright y alineado a la derecha (sin salirse del menú).
        Mismas clases (small-btn square) que #downloadAction de la app. -->
-  <div id="preregDownloadBtnWrap" style="display:flex; justify-content:flex-end; margin-top:14px;">
+  <!-- ✅NEW Nº1: Botón Donar, idéntico en estilo al botón Descargar, ubicado a su izquierda. -->
+  <div id="preregDownloadBtnWrap" style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:14px;">
+    <div class="small-btn square" id="donarActionPrereg" title="Donar"
+         onclick="el('modalDonar').style.display='flex'; updateModalState();">
+      <img src="DineroIcon.png" alt="Donar" onerror="this.style.display='none'">
+    </div>
     <div class="small-btn square" id="downloadActionPrereg" title="Descargar"
          onclick="el('modalDownload').style.display='flex'; updateModalState();">
       <img src="DescargarIcon3.png" alt="Descargar" onerror="this.style.display='none'">
@@ -2306,6 +2345,74 @@ Explorá cómo funciona por dentro, sus características principales, mejoras, h
           </svg>
           Llenar el formulario
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅NEW Nº1: MODAL DONAR PARA EL DESARROLLO - idéntico en estructura/estilo a modalReportar -->
+  <div class="modal-backdrop" id="modalDonar" role="dialog" aria-hidden="true">
+    <div class="modal" style="max-width:450px;">
+      <button onclick="el('modalDonar').style.display='none'" class="btn-close-x">X</button>
+      <h2 style="color:var(--accent); margin:0; text-align:center;">Donar para el desarrollo</h2>
+
+      <p style="color:#9aa4b2; font-size:13px; text-align:center; margin-top:10px; margin-bottom:20px;">
+        Cada aporte, por pequeño que sea, ayuda muchísimo a seguir desarrollando Synergi. ¡Gracias por tu apoyo! ♥️
+      </p>
+
+      <div class="scrolling-frame" style="padding:0;">
+        <div style="padding:15px;">
+
+          <!-- Frame 1: Donar básica -->
+          <div class="donar-frame">
+            <div class="donar-frame-icon"><img src="DineroIcon.png" alt="Donar" onerror="this.style.display='none'"></div>
+            <div class="donar-frame-info">
+              <p class="donar-frame-title">Donar básica</p>
+              <p class="donar-frame-sub">Ayudarías muchísimo♥️</p>
+            </div>
+            <button type="button" class="donar-frame-price-btn" onclick="donarSynergi('basica', 99)">0,99 USD</button>
+          </div>
+
+          <!-- Frame 2: Donar normal -->
+          <div class="donar-frame">
+            <div class="donar-frame-icon"><img src="DineroIcon2.png" alt="Donar" onerror="this.style.display='none'"></div>
+            <div class="donar-frame-info">
+              <p class="donar-frame-title">Donar normal</p>
+              <p class="donar-frame-sub">Ayudarías muchísimo♥️</p>
+            </div>
+            <button type="button" class="donar-frame-price-btn" onclick="donarSynergi('normal', 499)">4,99 USD</button>
+          </div>
+
+          <!-- Frame 3: Donador Pro -->
+          <div class="donar-frame">
+            <div class="donar-frame-icon"><img src="DineroIcon3.png" alt="Donar" onerror="this.style.display='none'"></div>
+            <div class="donar-frame-info">
+              <p class="donar-frame-title">Donador Pro</p>
+              <p class="donar-frame-sub">Ayudarías muchísimo♥️</p>
+            </div>
+            <button type="button" class="donar-frame-price-btn" onclick="donarSynergi('pro', 1099)">10,99 USD</button>
+          </div>
+
+          <!-- Frame 4: Donador supremo -->
+          <div class="donar-frame">
+            <div class="donar-frame-icon"><img src="DineroIcon4.png" alt="Donar" onerror="this.style.display='none'"></div>
+            <div class="donar-frame-info">
+              <p class="donar-frame-title">Donador supremo</p>
+              <p class="donar-frame-sub">Ayudarías muchísimo♥️</p>
+            </div>
+            <button type="button" class="donar-frame-price-btn" onclick="donarSynergi('supremo', 3099)">30,99 USD</button>
+          </div>
+
+          <!-- Frame 5: Donador mega supremo -->
+          <div class="donar-frame">
+            <div class="donar-frame-icon"><img src="DineroIcon5.png" alt="Donar" onerror="this.style.display='none'"></div>
+            <div class="donar-frame-info">
+              <p class="donar-frame-title">Donador mega supremo</p>
+              <p class="donar-frame-sub">Ayudarías muchísimo♥️</p>
+            </div>
+            <button type="button" class="donar-frame-price-btn" onclick="donarSynergi('mega_supremo', 4799)">47,99 USD</button>
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
@@ -6704,6 +6811,40 @@ async function realPremiumPurchase() {
     }
   } catch (error) {
     console.error('Error en compra premium:', error);
+    alert('Error de conexión con el servidor de pagos');
+  }
+}
+
+/* ====== ✅NEW Nº1: Función para donación REAL con Stripe ====== */
+async function donarSynergi(tier, amountCents) {
+  const currentUserRaw = localStorage.getItem('synergi_me');
+  const currentUser = currentUserRaw ? JSON.parse(currentUserRaw) : null;
+
+  try {
+    const response = await fetch(`${SERVER_URL}/create-donation-session`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        userId: currentUser ? currentUser.id : null,
+        username: currentUser ? currentUser.username : 'Invitado',
+        tier: tier,
+        amount: amountCents
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No se recibió URL de pago');
+      }
+    } else {
+      const errorData = await response.json();
+      alert(`Error al crear la donación: ${errorData.message || 'Error desconocido'}`);
+    }
+  } catch (error) {
+    console.error('Error en donación:', error);
     alert('Error de conexión con el servidor de pagos');
   }
 }
