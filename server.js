@@ -1100,6 +1100,209 @@ app.get('/payment-cancel', (req, res) => {
   `);
 });
 
+// ====== 💜 SISTEMA DE DONACIONES REAL CON STRIPE (✅NEW Nº1) ======
+
+const DONATION_TIERS = {
+  basica:       { name: 'Donación básica',        amount: 99   },
+  normal:       { name: 'Donar normal',            amount: 499  },
+  pro:          { name: 'Donador Pro',             amount: 1099 },
+  supremo:      { name: 'Donador supremo',         amount: 3099 },
+  mega_supremo: { name: 'Donador mega supremo',    amount: 4799 }
+};
+
+// 🚀 ENDPOINT: Crear sesión de donación REAL
+app.post('/create-donation-session', async (req, res) => {
+  try {
+    const { userId, username, tier, amount } = req.body;
+
+    const donationInfo = DONATION_TIERS[tier];
+    if (!donationInfo) {
+      return res.status(400).json({ message: 'Tier de donación inválido' });
+    }
+
+    let customerEmail;
+    if (userId) {
+      const user = users.find(u => u.id === userId);
+      if (user && user.email) customerEmail = user.email;
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `Synergi - ${donationInfo.name}`,
+              description: 'Donación para el desarrollo de Synergi. ¡Gracias por tu apoyo! ♥️',
+            },
+            unit_amount: donationInfo.amount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${BASE_URL}/donation-success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${BASE_URL}/donation-cancel`,
+      customer_email: customerEmail,
+      metadata: {
+        userId: userId || 'anonimo',
+        username: username || 'Invitado',
+        tier: tier,
+        type: 'donacion'
+      }
+    });
+
+    console.log(`💜 Sesión de donación creada (${donationInfo.name}) para ${username || 'Invitado'}: ${session.id}`);
+
+    res.json({
+      url: session.url,
+      sessionId: session.id
+    });
+
+  } catch (error) {
+    console.error('❌ Error creando sesión de donación:', error);
+    res.status(500).json({
+      message: 'Error al crear sesión de donación',
+      error: error.message
+    });
+  }
+});
+
+// 🎉 ENDPOINT: Confirmar donación exitosa
+app.get('/donation-success', async (req, res) => {
+  try {
+    const { session_id } = req.query;
+
+    if (!session_id) {
+      return res.status(400).send('Parámetros faltantes');
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(session_id);
+
+    if (session.payment_status === 'paid') {
+      console.log(`✅ Donación confirmada: ${session.id} - ${session.metadata?.tier || ''} - ${session.metadata?.username || 'Invitado'}`);
+
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>¡Gracias por tu donación!</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+              margin: 0;
+            }
+            .container {
+              background: white;
+              padding: 40px;
+              border-radius: 20px;
+              text-align: center;
+              box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            }
+            h1 { color: #0ea5e9; margin-bottom: 20px; }
+            p { font-size: 18px; color: #333; }
+            .heart-icon { font-size: 80px; margin-bottom: 20px; }
+            .btn {
+              display: inline-block;
+              margin-top: 30px;
+              padding: 15px 40px;
+              background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+              color: white;
+              text-decoration: none;
+              border-radius: 50px;
+              font-weight: bold;
+            }
+            .btn:hover { transform: translateY(-2px); }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="heart-icon">♥️</div>
+            <h1>¡Gracias por tu donación!</h1>
+            <p><strong>Tu apoyo ayuda muchísimo al desarrollo de Synergi.</strong></p>
+            <a href="/" class="btn">Volver a Synergi</a>
+          </div>
+          <script>
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 5000);
+          </script>
+        </body>
+        </html>
+      `);
+    } else {
+      res.status(400).send('El pago no se completó correctamente');
+    }
+
+  } catch (error) {
+    console.error('❌ Error verificando donación:', error);
+    res.status(500).send('Error al verificar la donación');
+  }
+});
+
+// ❌ ENDPOINT: Donación cancelada
+app.get('/donation-cancel', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Donación Cancelada</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          margin: 0;
+        }
+        .container {
+          background: white;
+          padding: 40px;
+          border-radius: 20px;
+          text-align: center;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        h1 { color: #f5576c; margin-bottom: 20px; }
+        p { font-size: 18px; color: #333; }
+        .icon { font-size: 80px; margin-bottom: 20px; }
+        .btn {
+          display: inline-block;
+          margin-top: 30px;
+          padding: 15px 40px;
+          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+          color: white;
+          text-decoration: none;
+          border-radius: 50px;
+          font-weight: bold;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="icon">😔</div>
+        <h1>Donación Cancelada</h1>
+        <p>No se completó la donación a Synergi</p>
+        <p>Puedes intentar nuevamente cuando quieras</p>
+        <a href="/" class="btn">Volver a Synergi</a>
+      </div>
+      <script>
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 5000);
+      </script>
+    </body>
+    </html>
+  `);
+});
+
 // 🔔 WEBHOOK: Recibir eventos de Stripe (renovaciones automáticas, cancelaciones, etc.)
 app.post('/webhook', express.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers['stripe-signature'];
