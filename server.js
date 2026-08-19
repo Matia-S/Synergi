@@ -13,6 +13,19 @@ const stripe = require('stripe')('sk_test_51SzMjvGhbQMsA6UZtRXvR5nseUDVFa95MVWoR
 // ✅NEW: URL pública real del servidor. NUNCA pongas "localhost" aquí —
 // localhost solo funciona en TU propia computadora, no para tus usuarios.
 // Si en el futuro cambias de hosting, solo actualizas esta línea.
+
+// ✅NEW Nº1: Versión de la app — se calcula sola con la fecha de modificación
+// de index.html, así nunca tenés que acordarte de subir un número a mano.
+// Cada vez que Render reinicia el proceso (o sea, cada deploy), esta versión cambia.
+const APP_VERSION = (() => {
+  try {
+    const stat = fs.statSync(path.join(__dirname, 'index.html'));
+    return String(stat.mtimeMs);
+  } catch (e) {
+    return String(Date.now());
+  }
+})();
+
 const BASE_URL = 'https://synergi-q4a2.onrender.com';
 
 const nodemailer = require('nodemailer');
@@ -364,6 +377,12 @@ app.get('/health', (req, res) => {
   res.status(200).json({ ok: true });
 });
 
+// ✅NEW Nº1: Endpoint que el cliente consulta para saber si hay versión nueva
+app.get('/api/version', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.json({ version: APP_VERSION });
+});
+
 // ✅NEW: Service Worker servido SIN caché, para que las actualizaciones
 // de la PWA se apliquen al instante (debe ir ANTES del express.static)
 app.get('/sw.js', (req, res) => {
@@ -376,7 +395,15 @@ const PUBLIC_DIR = path.join(__dirname, '.');
 if (fs.existsSync(PUBLIC_DIR)) {
   app.use(express.static(PUBLIC_DIR, {
     setHeaders: (res, p) => {
-      res.setHeader('Cache-Control', 'public, max-age=86400');
+      // ✅FIX Nº1: index.html y manifest.json NUNCA se cachean —
+      // así el navegador siempre pide la versión más nueva de la página.
+      // El resto de archivos (imágenes, css, etc.) sigue cacheado 24hs, normal.
+      if (p.endsWith('index.html') || p.endsWith('manifest.json')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+      } else {
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+      }
       res.setHeader('Access-Control-Allow-Origin', '*');
     }
   }));
