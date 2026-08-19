@@ -3463,6 +3463,71 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+/* ==== ✅NEW Nº1: Detección y aviso de actualización de Synergi ==== */
+let _synergiVersionActual = null;
+const SYNERGI_VERSION_CHECK_MS = 60 * 1000; // revisa cada 60 segundos
+
+function _synergiMostrarBannerActualizacion() {
+  if (document.getElementById('synergiUpdateBanner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'synergiUpdateBanner';
+  banner.style.cssText = `
+    position:fixed; left:0; right:0; bottom:0; z-index:999999;
+    background:linear-gradient(90deg,#0ea5e9,#38bdf8);
+    color:#031018; font-family:'Inter',sans-serif; font-weight:600;
+    padding:14px 18px; display:flex; align-items:center; justify-content:center;
+    gap:14px; flex-wrap:wrap; box-shadow:0 -4px 18px rgba(0,0,0,.35);
+  `;
+  banner.innerHTML = `
+    <span>🚀 Hay una nueva versión de Synergi disponible.</span>
+    <button id="synergiUpdateBtn" style="
+      background:#031018; color:#38bdf8; border:none; border-radius:8px;
+      padding:8px 16px; font-weight:700; cursor:pointer;
+    ">Actualizar ahora</button>
+  `;
+  document.body.appendChild(banner);
+
+  document.getElementById('synergiUpdateBtn').addEventListener('click', () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        window.location.reload();
+      }).catch(() => window.location.reload());
+    } else {
+      window.location.reload();
+    }
+  });
+}
+
+async function _synergiChequearVersion() {
+  try {
+    const res = await fetch('/api/version', { cache: 'no-store' });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (_synergiVersionActual === null) {
+      _synergiVersionActual = data.version;
+      return;
+    }
+    if (data.version !== _synergiVersionActual) {
+      _synergiMostrarBannerActualizacion();
+    }
+  } catch (e) { /* sin conexión: se reintenta en el próximo ciclo */ }
+}
+
+_synergiChequearVersion();
+setInterval(_synergiChequearVersion, SYNERGI_VERSION_CHECK_MS);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') _synergiChequearVersion();
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+
 function isIOS() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
