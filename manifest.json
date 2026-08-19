@@ -9,13 +9,13 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "6162758d7a84d0b950fca866c2ff064.png",
+      "src": "LogoSynergiPrincipal.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "6162758d7a84d0b950fca866c2ff064.png",
+      "src": "LogoSynergiPrincipal.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
